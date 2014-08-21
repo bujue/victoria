@@ -25,19 +25,22 @@ class VicSpider(scrapy.Spider):
         item['title'] = sel.xpath("//div[@class='name']/hgroup/h1/text()").extract()
         item['description'] = sel.xpath("//div[@class='full']//text()").extract()[0]
         item['details'] = sel.xpath("//div[@id='description']//ul/li//text()").extract()
+
         item['images'] = sel.xpath("//img[@id='vsImage']/@src").extract()
         item['imagesdata'] = sel.xpath("//ul[@class='pdp-info box split primary']//section[@class='swatches module']/div[@class='swap']//span[@data-alt-image]/@data-alt-image").extract()
+
         item['prices'] = map(unicode.strip,sel.xpath("//ul[@class='pdp-info box split primary']/li//div[@class='price']/p/text()").extract())[0]
         item['colors'] = sel.xpath("//ul[@class='pdp-info box split primary']//section[@class='swatches module']/div[@class='swap']//h4/text()").extract()
         item['sizes'] = sel.xpath("//ul[@class='pdp-info box split primary']//div[@class=' scroll']//a//span/text()").extract()[1:]
+
+
         item['id'] = sel.xpath("//section[@class='product']/@data-id").extract()[0]
 
         str = sel.xpath("//script//text()").extract()
-        item['data'] = []
         for i in str:
-            res = re.search('\"assetId\".*?priceTypeInd',i)
-            if res:
-                item['data'].append(res.group())
+            res = re.findall('\{\"assetId\".*?\"R\"\}',i)
+            if res != []:
+                item['data'] = res
 
         yield item
 
